@@ -287,7 +287,7 @@ try:
 
         
         res = True
-
+        SetVar(var_, res)
         try:
             if not 'data' in mod_xml_sessions[session]:
                 raise Exception('The session no exists')
@@ -298,6 +298,7 @@ try:
             with open(path, "wb") as f: 
                 f.write(b_xml)
                 f.close()
+
         except Exception as e:
             res = False
             SetVar(var_, res)
