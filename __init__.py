@@ -127,6 +127,8 @@ try:
                     res.append(item.text)
         else:
             tmp = root_xml.find(xpath)
+            if not xpath:
+                tmp = root_xml
             if attribute:
                 res = tmp.attrib[attribute]
             else:
