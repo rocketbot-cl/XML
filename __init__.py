@@ -115,16 +115,20 @@ try:
         if not 'data' in mod_xml_sessions[session]:
             # Remember set session
             raise Exception('The session no exists')
-
         root_xml = mod_xml_sessions[session]['data']
         if multiple and multiple == 'True':
             res = []
             tmp = root_xml.findall(xpath)
-            for item in tmp:
-                if attribute:
+            data_dict = {}
+            if attribute:
+                for item in tmp:
                     res.append(item.attrib[attribute])
-                else:
-                    res.append(item.text)
+            else:
+                for child in tmp:
+                    for little_child in child:
+                        data_dict[little_child.tag] = little_child.text
+                    res.append(data_dict)
+
         else:
             tmp = root_xml.find(xpath)
             if not xpath:
