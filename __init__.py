@@ -36,6 +36,7 @@ if not cur_path in sys.path:
 import xmltodict
 # Globals declared here.
 global mod_xml_sessions
+global xml
 # Defaults declared here.
 SESSION_DEFAULT = "default"
 
@@ -52,6 +53,13 @@ except NameError:
     Obtengo el modulo que fue invocado
 """
 module = GetParams("module")
+
+def ordereddict_to_dict(value):
+    global ordereddict_to_dict
+    for k, v in value.items():
+        if isinstance(v, dict):
+            value[k] = ordereddict_to_dict(v)
+    return dict(value)
 
 try:
 
@@ -116,29 +124,35 @@ try:
             # Remember set session
             raise Exception('The session no exists')
         root_xml = mod_xml_sessions[session]['data']
-        if multiple and multiple == 'True':
-            res = []
-            tmp = root_xml.findall(xpath)
-            data_dict = {}
-            if attribute:
-                for item in tmp:
-                    res.append(item.attrib[attribute])
-            else:
-                for child in tmp:
-                    for little_child in child:
-                        data_dict[little_child.tag] = little_child.text
-                    res.append(data_dict)
 
-        else:
-            tmp = root_xml.find(xpath)
-            if not xpath:
-                tmp = root_xml
-            if attribute:
-                res = tmp.attrib[attribute]
+        #Getting xml and parsing to json
+        root_xml_ordered_dict = xmltodict.parse(ET.tostring(root_xml))
+        root_xml_dict_str = json.dumps(root_xml_ordered_dict)
+        root_xml_dict = json.loads(root_xml_dict_str)
+        list_nodes =  xpath.split("/")
+        if list_nodes[-1] == "*":
+            list_nodes.pop(-1)
+        node_desired = None
+        for node in list_nodes:
+            if node_desired:
+                node_desired = node_desired[node]
             else:
-                res = tmp.text
-        
-        SetVar(var_, res)
+                node_desired = root_xml_dict[node]
+        print("node_desired: ", node_desired)
+        if attribute:
+            if multiple:
+                if attribute in node_desired:
+                    SetVar(var_, node_desired[attribute])
+                else:
+                    SetVar(var_, [])
+            else:
+                if attribute in node_desired:
+                    SetVar(var_, node_desired[attribute])
+                else:
+                    SetVar(var_, "")
+        else:
+            SetVar(var_, node_desired)
+
 
     if module == "xmlinsertnode":
         """
