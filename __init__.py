@@ -26,6 +26,7 @@ Para instalar librerias se debe ingresar por terminal a la carpeta "libs"
 import os
 import json
 from xml.etree import ElementTree as ET
+import re
 
 base_path = tmp_global_obj["basepath"]
 cur_path = base_path + 'modules' + os.sep + 'XML' + os.sep + 'libs' + os.sep
@@ -86,6 +87,13 @@ try:
                 fd.close()
         else:
             xml = xml_
+        xml = ET.tostring(xml, encoding="utf-8").decode("utf-8")
+        xml = re.sub(r"ns\d:", "", xml)
+        
+        root_xml_ordered_dict = xmltodict.parse(xml)
+        root_xml_dict_str = json.dumps(root_xml_ordered_dict)
+        root_xml_dict = json.loads(root_xml_dict_str)
+        
         mod_xml_sessions[session]['data'] = ET.fromstring(xml)
         if var_:
             #Convert only if required
