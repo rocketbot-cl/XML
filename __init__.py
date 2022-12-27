@@ -75,8 +75,7 @@ try:
         mod_xml_sessions[session]={'path': path}
         if path:
             with open(path, encoding=encoding) as fd:
-                xml = fd.read()
-                print(xml)        
+                xml = fd.read()        
         else:
             xml = xml_
         mod_xml_sessions[session]['data'] = ET.fromstring(xml)
@@ -233,8 +232,6 @@ try:
         if overwrite and node_exist:
             mod_xml_sessions[session]['data'].find(xpath + "/" + node, namespaces=namespaces_).text = value
 
-        
-        
         res = json.dumps(xmltodict.parse(ET.tostring(mod_xml_sessions[session]['data']).decode()))
         
         if var_:
