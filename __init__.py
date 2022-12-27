@@ -57,7 +57,7 @@ module = GetParams("module")
 try:
 
     if module == "xmlsession":
-        """ 
+ """ 
         XML Session: Open session, read xml from file or text
         """
         path = GetParams('path')
@@ -102,7 +102,7 @@ try:
                 mod_xml_sessions[SESSION_DEFAULT] = {}
         else:
             raise Exception("The session you want to delete does not exist")
-
+    
     if module == "xmlgetnode":
         """
         XML Get Node: get data from xml node
