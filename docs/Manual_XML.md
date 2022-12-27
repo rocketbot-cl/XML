@@ -15,7 +15,7 @@ __Download__ and __install__ the content in 'modules' folder in Rocketbot path
 
 ## Description of the commands
 
-### Load XML Fil
+### Load XML File
   
 Load data from an XML file into memory
 |Parameters|Description|example|
