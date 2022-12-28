@@ -23,10 +23,10 @@ Para instalar librerias se debe ingresar por terminal a la carpeta "libs"
     pip install <package> -t .
 
 """
+import sys
 import os
 import json
 from xml.etree import ElementTree as ET
-import re
 
 base_path = tmp_global_obj["basepath"]
 cur_path = base_path + 'modules' + os.sep + 'XML' + os.sep + 'libs' + os.sep
@@ -37,7 +37,6 @@ if not cur_path in sys.path:
 import xmltodict
 # Globals declared here.
 global mod_xml_sessions
-global xml
 # Defaults declared here.
 SESSION_DEFAULT = "default"
 
@@ -55,17 +54,10 @@ except NameError:
 """
 module = GetParams("module")
 
-def ordereddict_to_dict(value):
-    global ordereddict_to_dict
-    for k, v in value.items():
-        if isinstance(v, dict):
-            value[k] = ordereddict_to_dict(v)
-    return dict(value)
-
 try:
 
     if module == "xmlsession":
-        """ 
+ """ 
         XML Session: Open session, read xml from file or text
         """
         path = GetParams('path')
@@ -83,18 +75,15 @@ try:
         mod_xml_sessions[session]={'path': path}
         if path:
             with open(path, encoding=encoding) as fd:
-                xml = fd.read()            
-                fd.close()
+                xml = fd.read()        
         else:
             xml = xml_
-        xml = ET.tostring(xml, encoding="utf-8").decode("utf-8")
-        xml = re.sub(r"ns\d:", "", xml)
-        
-        root_xml_ordered_dict = xmltodict.parse(xml)
-        root_xml_dict_str = json.dumps(root_xml_ordered_dict)
-        root_xml_dict = json.loads(root_xml_dict_str)
-        
         mod_xml_sessions[session]['data'] = ET.fromstring(xml)
+        try:
+            mod_xml_sessions[session]['namespaces'] = dict([node for _, node in ET.iterparse(path, events=['start-ns'])])
+        except:
+            pass
+        
         if var_:
             #Convert only if required
             doc = xmltodict.parse(xml)
@@ -113,7 +102,7 @@ try:
                 mod_xml_sessions[SESSION_DEFAULT] = {}
         else:
             raise Exception("The session you want to delete does not exist")
-
+    
     if module == "xmlgetnode":
         """
         XML Get Node: get data from xml node
@@ -123,7 +112,15 @@ try:
         session = GetParams('session')
         xpath = GetParams('xpath')
         multiple = GetParams('multiple')
+        namespaces_ = GetParams('namespaces')
 
+        if namespaces_:
+            namespaces_ = eval(namespaces_)
+            if not isinstance(namespaces_, dict):
+                raise Exception ("Namespaces must be a dictionary.")
+        else:
+            namespaces_ = None
+        
         # Set Default session
         if not session:
             session = SESSION_DEFAULT
@@ -132,35 +129,30 @@ try:
             # Remember set session
             raise Exception('The session no exists')
         root_xml = mod_xml_sessions[session]['data']
+        if multiple and multiple == 'True':
+            res = []
+            tmp = root_xml.findall(xpath, namespaces=namespaces_)
+            data_dict = {}
+            if attribute:
+                for item in tmp:
+                    res.append(item.attrib[attribute])
+            else:
+                for child in tmp:
+                    for little_child in child:
+                        data_dict[little_child.tag] = little_child.text
+                    res.append(data_dict)
 
-        #Getting xml and parsing to json
-        root_xml_ordered_dict = xmltodict.parse(ET.tostring(root_xml))
-        root_xml_dict_str = json.dumps(root_xml_ordered_dict)
-        root_xml_dict = json.loads(root_xml_dict_str)
-        list_nodes =  xpath.split("/")
-        if list_nodes[-1] == "*":
-            list_nodes.pop(-1)
-        node_desired = None
-        for node in list_nodes:
-            if node_desired:
-                node_desired = node_desired[node]
-            else:
-                node_desired = root_xml_dict[node]
-        print("node_desired: ", node_desired)
-        if attribute:
-            if multiple:
-                if attribute in node_desired:
-                    SetVar(var_, node_desired[attribute])
-                else:
-                    SetVar(var_, [])
-            else:
-                if attribute in node_desired:
-                    SetVar(var_, node_desired[attribute])
-                else:
-                    SetVar(var_, "")
         else:
-            SetVar(var_, node_desired)
-
+            tmp = root_xml.find(xpath, namespaces=namespaces_)
+            
+            if not xpath:
+                tmp = root_xml
+            if attribute:
+                res = tmp.attrib[attribute]
+            else:
+                res = tmp.text
+        
+        SetVar(var_, res)
 
     if module == "xmlinsertnode":
         """
@@ -174,6 +166,14 @@ try:
         session = GetParams('session')
         xpath = GetParams('xpath')
         location = GetParams('location')
+        namespaces_ = GetParams('namespaces')
+
+        if namespaces_:
+            namespaces_ = eval(namespaces_)
+            if not isinstance(namespaces_, dict):
+                raise Exception ("Namespaces must be a dictionary.")
+        else:
+            namespaces_ = None
 
         res = None
         location_ = 0
@@ -198,18 +198,18 @@ try:
             if location == "beging":
                 location_ = 0
             elif location == "end":
-                if mod_xml_sessions[session]['data'].find(xpath):
-                    location_ = len(mod_xml_sessions[session]['data'].find(xpath))
+                if mod_xml_sessions[session]['data'].find(xpath, namespaces=namespaces_):
+                    location_ = len(mod_xml_sessions[session]['data'].find(xpath, namespaces=namespaces_))
 
             elif location in ["before", "after"]:
-                for i in mod_xml_sessions[session]['data'].find(xpath):
+                for i in mod_xml_sessions[session]['data'].find(xpath, namespaces=namespaces_):
                     if i.tag == specified:
                         break
                     location_ = location_ + 1
                 if location == "after":                   
                     location_ = location_ + 1
 
-        node_exist = len(mod_xml_sessions[session]['data'].findall(xpath + "/" + node)) > 0
+        node_exist = len(mod_xml_sessions[session]['data'].findall(xpath + "/" + node, namespaces=namespaces_)) > 0
         
         if if_exist and len(if_exist) > 0:
             if if_exist == "skip":
@@ -225,15 +225,13 @@ try:
         
         if add_ or not node_exist:
             try:
-                mod_xml_sessions[session]['data'].find(xpath).insert(location_,item)
+                mod_xml_sessions[session]['data'].find(xpath, namespaces=namespaces_).insert(location_,item)
             except Exception as e:
                 SetVar(var_, False)
                 raise e
         if overwrite and node_exist:
-            mod_xml_sessions[session]['data'].find(xpath + "/" + node).text = value
+            mod_xml_sessions[session]['data'].find(xpath + "/" + node, namespaces=namespaces_).text = value
 
-        
-        
         res = json.dumps(xmltodict.parse(ET.tostring(mod_xml_sessions[session]['data']).decode()))
         
         if var_:
@@ -248,7 +246,15 @@ try:
         xpath = GetParams('xpath')
         data = GetParams('data')
         attr_ = GetParams('attr')
+        namespaces_ = GetParams('namespaces')
 
+        if namespaces_:
+            namespaces_ = eval(namespaces_)
+            if not isinstance(namespaces_, dict):
+                raise Exception ("Namespaces must be a dictionary.")
+        else:
+            namespaces_ = None
+        
         res = None        
         
         # Set Default session
@@ -259,9 +265,9 @@ try:
             # Remember set session
             raise Exception('The session no exists')
         
-        item = mod_xml_sessions[session]['data'].find(xpath)
+        item = mod_xml_sessions[session]['data'].find(xpath, namespaces=namespaces_)
         if item != None:
-            mod_xml_sessions[session]['data'].find(xpath).text = data
+            mod_xml_sessions[session]['data'].find(xpath, namespaces=namespaces_).text = data
             if attr_ and len(attr_) > 1 and "=" in attr_:
                 att = attr_.split(",")
                 for at in att:
@@ -277,6 +283,14 @@ try:
         var_ = GetParams('result')        
         session = GetParams('session')
         xpath = GetParams('xpath')
+        namespaces_ = GetParams('namespaces')
+
+        if namespaces_:
+            namespaces_ = eval(namespaces_)
+            if not isinstance(namespaces_, dict):
+                raise Exception ("Namespaces must be a dictionary.")
+        else:
+            namespaces_ = None
         
         res = None        
         
@@ -288,7 +302,7 @@ try:
             # Remember set session
             raise Exception('The session no exists')
         
-        item = mod_xml_sessions[session]['data'].find(xpath)
+        item = mod_xml_sessions[session]['data'].find(xpath, namespaces=namespaces_)
         root = mod_xml_sessions[session]['data']
         global xml_iterator
         def xml_iterator(parents, nested, item):
@@ -312,7 +326,6 @@ try:
         session = GetParams('session')
         if not session:
             session = SESSION_DEFAULT
-
         
         res = True
         SetVar(var_, res)
@@ -322,10 +335,14 @@ try:
             root_xml = mod_xml_sessions[session]['data']
             enc_ = "utf-8"
             
-            b_xml = ET.tostring(root_xml)
+            namespaces = mod_xml_sessions[session].get('namespaces', None)
+            if namespaces:
+                for ns, url in namespaces.items():
+                    ET.register_namespace(ns, url)
+            
+            b_xml = ET.tostring(root_xml, enc_)
             with open(path, "wb") as f: 
                 f.write(b_xml)
-                f.close()
 
         except Exception as e:
             res = False

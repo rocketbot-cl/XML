@@ -4,20 +4,19 @@
 
 # XML
   
-Open XML files to get data.  
+Abre archivos XML para extrer informacion.  
 
-## Howto install this module
+## How to install this module
   
-__Download__ and __install__ the content in 'modules' folder in Rocketbot path
-## How to use this module
-  
-Eiusmod veniam ut nisi minim in. Do et deserunt eiusmod veniam sint aliqua nulla adipisicing laboris voluptate fugiat 
-ullamco elit do. Sint amet cillum fugiat excepteur mollit voluptate reprehenderit nisi commodo sint minim.
+__Download__ and __install__ the content in 'modules' folder in Rocketbot path  
+
+
+
 ## Overview
 
 
-1. Load XML File  
-Load XML File in memory
+1. Load XML Fil  
+Load data from an XML file into memory
 
 2. Insert Node  
 Insert node on XML
@@ -35,8 +34,9 @@ Delete node by XPath
 Save XML File
 
 7. End XML Session  
-Remove an xml session from memory
-### Updates
+Remove an xml session from memory  
+
+
 
 
 ----
