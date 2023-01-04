@@ -57,7 +57,7 @@ module = GetParams("module")
 try:
 
     if module == "xmlsession":
- """ 
+        """ 
         XML Session: Open session, read xml from file or text
         """
         path = GetParams('path')
