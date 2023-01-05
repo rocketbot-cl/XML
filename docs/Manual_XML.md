@@ -1,7 +1,3 @@
-
-
-
-
 # XML
   
 Abre archivos XML para extrer informacion.  
@@ -99,3 +95,4 @@ Remove an xml session from memory
 |Parameters|Description|example|
 | --- | --- | --- |
 |Session ID||Default|
+
