@@ -78,16 +78,17 @@ try:
                 xml = fd.read()        
         else:
             xml = xml_
+            
         mod_xml_sessions[session]['data'] = ET.fromstring(xml)
+        
+        mod_xml_sessions[session]['dict'] = xmltodict.parse(xml)
         try:
             mod_xml_sessions[session]['namespaces'] = dict([node for _, node in ET.iterparse(path, events=['start-ns'])])
         except:
             pass
         
         if var_:
-            #Convert only if required
-            doc = xmltodict.parse(xml)
-            SetVar(var_, json.loads(json.dumps(doc)))
+            SetVar(var_, json.loads(json.dumps(mod_xml_sessions[session]['dict'])))
 
     if module == "xmlsessionend":
         """
@@ -344,6 +345,24 @@ try:
             with open(path, "wb") as f: 
                 f.write(b_xml)
 
+        except Exception as e:
+            res = False
+            SetVar(var_, res)
+            raise e
+
+    
+    if module == 'dicttoxml':
+        dict_ = eval(GetParams('dict'))       
+        path = GetParams('path')
+        encoding = GetParams('encoding')
+        var_ = GetParams('result')
+        
+        try:
+            with open(path, 'w') as f:
+                f.write(xmltodict.unparse(dict_, encoding=encoding))
+                
+            res = True
+            SetVar(var_, res)
         except Exception as e:
             res = False
             SetVar(var_, res)

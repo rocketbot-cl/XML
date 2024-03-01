@@ -4,18 +4,21 @@
 
 # XML
   
-Abre archivos XML para extrer informacion.  
+Open XML files to get data.  
+
+*Read this in other languages: [English](README.md), [Português](README.pr.md), [Español](README.es.md)*
 
 ## How to install this module
   
-__Download__ and __install__ the content in 'modules' folder in Rocketbot path  
-
+To install the module in Rocketbot Studio, it can be done in two ways:
+1. Manual: __Download__ the .zip file and unzip it in the modules folder. The folder name must be the same as the module and inside it must have the following files and folders: \__init__.py, package.json, docs, example and libs. If you have the application open, refresh your browser to be able to use the new module.
+2. Automatic: When entering Rocketbot Studio on the right margin you will find the **Addons** section, select **Install Mods**, search for the desired module and press install.  
 
 
 ## Overview
 
 
-1. Load XML Fil  
+1. Load XML File  
 Load data from an XML file into memory
 
 2. Insert Node  
@@ -34,7 +37,10 @@ Delete node by XPath
 Save XML File
 
 7. End XML Session  
-Remove an xml session from memory  
+Remove an xml session from memory
+
+8. Dictionary to XML File  
+Convert a python dictionary into a XML file  
 
 
 

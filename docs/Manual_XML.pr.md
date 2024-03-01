@@ -4,13 +4,16 @@
 
 # XML
   
-Open XML files to get data.  
+Abra arquivos XML para obter dados.  
+
+*Read this in other languages: [English](Manual_XML.md), [Português](Manual_XML.pr.md), [Español](Manual_XML.es.md)*
   
-![banner](imgs/Banner_XML.png)
+![banner](imgs/Banner_XML.png o jpg)
 ## Como instalar este módulo
   
-__Baixe__ e __instale__ o conteúdo na pasta 'modules' no caminho do Rocketbot  
-
+Para instalar o módulo no Rocketbot Studio, pode ser feito de duas formas:
+1. Manual: __Baixe__ o arquivo .zip e descompacte-o na pasta módulos. O nome da pasta deve ser o mesmo do módulo e dentro dela devem ter os seguintes arquivos e pastas: \__init__.py, package.json, docs, example e libs. Se você tiver o aplicativo aberto, atualize seu navegador para poder usar o novo módulo.
+2. Automático: Ao entrar no Rocketbot Studio na margem direita você encontrará a seção **Addons**, selecione **Install Mods**, procure o módulo desejado e aperte instalar.  
 
 
 ## Descrição do comando
@@ -99,3 +102,13 @@ Remove uma sessão XML e libera memória
 |Parâmetros|Descrição|exemplo|
 | --- | --- | --- |
 |ID Sessão||Default|
+
+### Dicionário para arquivo XML
+  
+Converta um dicionário python em um arquivo XML
+|Parâmetros|Descrição|exemplo|
+| --- | --- | --- |
+|Dicionário||dictionary|
+|Caminho do arquivo XML||C:/Users/usuario/Desktop/archivo.xml|
+|Codificação||latin-1|
+|Atribuir resultado à variável||Variável|
